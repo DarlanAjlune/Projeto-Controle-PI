@@ -1,24 +1,19 @@
-# -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'main_v3.ui'
-#
-# Created by: PyQt5 UI code generator 5.14.1
-#
-# WARNING! All changes made in this file will be lost!
-# --------------> BACKEND
 from Utils.all import calcula_tudo, calcula_posterior
-# --------------> UI
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import*
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.figure import Figure
+from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as NavigationToolbar)
 import numpy as np
 import random
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as NavigationToolbar)
 import os.path
 import sqlite3
 
+'''
+    CONFIGURAÇÃO DO GRÁFICO
+'''
 class MplWidget(QWidget):
     
     def __init__(self, parent = None):
@@ -33,7 +28,9 @@ class MplWidget(QWidget):
         self.canvas.axes = self.canvas.figure.add_subplot(111)
         self.setLayout(vertical_layout)
 
-
+'''
+    CONFIGURAÇÃO DA JANELA PRINCIPAL
+'''
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -168,6 +165,7 @@ class Ui_MainWindow(object):
             self.ta = float(self.tableWidgetInsert.item(1,0).text())
             self.update_graph_import()
 
+    # carrega infos do db na tabela inferior
     def load_data_db_table(self):
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         db_path = os.path.join(BASE_DIR + "\Database", "metadata_PI_controler.db")
@@ -200,6 +198,7 @@ class Ui_MainWindow(object):
                  self.tableWidget.setItem(tablerow, 18, QtWidgets.QTableWidgetItem(str(row[18])))
                  tablerow+=1
 
+    # operação INSERT no bd local
     def insert_data_db_table(self,sp,kpLR,kiLR,kpRF,kiRF,metadataLR,metadataRF):
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         db_path = os.path.join(BASE_DIR + "\Database", "metadata_PI_controler.db")
@@ -209,6 +208,7 @@ class Ui_MainWindow(object):
             cur = db.cursor()
             cur.execute("insert into PI_CONTROLER values (?,?, ?, ?, ?, ?, ?, ? , ?,?,?,?,?,?,?,?,?,?,?)", (None,self.filename, float(self.mp), float(self.ta), float(sp), float(kpLR), float(kiLR), float(kpRF), float(kiRF), metadataLR[0], metadataLR[1], metadataLR[2], metadataLR[3], metadataLR[4], metadataRF[0], metadataRF[1], metadataRF[2], metadataRF[3], metadataRF[4]))
 
+    # formatação da tabela insert
     def format_table_insert(self):
         if self.flag:
             for _ in range(2): self.tableWidgetInsert.removeRow(0)
@@ -256,6 +256,7 @@ class Ui_MainWindow(object):
             self.insert_data_db_table(sp,kpLR,kiLR,kpRF,kiRF,metadataLR,metadataRF)
             self.load_data_db_table()
 
+    # plot via dados tabela
     def update_graph_insert(self,sp,kpRF,kiRF,kpLR,kiLR):
             t, rSMFLR, rSMFRF, metadataLR, metadataRF = calcula_posterior(sp,kpRF,kiRF,kpLR,kiLR)
             self.widget.canvas.axes.clear()
@@ -269,10 +270,6 @@ class Ui_MainWindow(object):
 
             self.widget.canvas.draw()
 
-    def precision(esperado, obtido):
-        p = ((esperado - obtido)/esperado)*100 
-        return float(p)
-
     # método get file .mat
     def getFile(self):
         '''
@@ -285,6 +282,7 @@ class Ui_MainWindow(object):
         self.notificationLabel.setText("OBS: inserir parâmetros obrigatórios")
         self.format_table_insert()
 
+    # configs tabela
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "PROJETO C213"))
@@ -298,7 +296,7 @@ class Ui_MainWindow(object):
         item.setText(_translate("MainWindow", "VALOR"))
 
 
-
+# main
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
